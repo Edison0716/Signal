@@ -12,18 +12,16 @@
 
 
 void init_with_signal(JNIEnv *env, jclass klass,
-                      jintArray signals,void (*handler)(int, struct siginfo *, void *)) {
+                      jintArray signals, void (*handler)(int, struct siginfo *, void *)) {
     // 注意释放内存
     jint *signalsFromJava = (*env)->GetIntArrayElements(env, signals, 0);
     int size = (*env)->GetArrayLength(env, signals);
     int needMask = 0;
-
     for (int i = 0; i < size; i++) {
         if (signalsFromJava[i] == SIGQUIT) {
             needMask = 1;
         }
     }
-
     do {
         sigset_t mask;
         sigset_t old;
@@ -39,7 +37,6 @@ void init_with_signal(JNIEnv *env, jclass klass,
             handle_exception(env);
             break;
         }
-
         if (needMask) {
             sigemptyset(&mask);
             sigaddset(&mask, SIGQUIT);
@@ -53,17 +50,14 @@ void init_with_signal(JNIEnv *env, jclass klass,
         sigc.sa_sigaction = handler;
         // 信号处理时，先阻塞所有的其他信号，避免干扰正常的信号处理程序
         sigfillset(&sigc.sa_mask);
-        sigc.sa_flags = SA_SIGINFO | SA_ONSTACK |SA_RESTART;
-
-
+        sigc.sa_flags = SA_SIGINFO | SA_ONSTACK | SA_RESTART;
         // 注册所有信号
         for (int i = 0; i < size; i++) {
             // 这里不需要旧的处理函数
             // 指定SIGKILL和SIGSTOP以外的所有信号
             int flag = sigaction(signalsFromJava[i], &sigc, NULL);
             if (flag == -1) {
-                __android_log_print(ANDROID_LOG_INFO, TAG, "register fail ===== signals[%d] ",
-                                    i);
+                __android_log_print(ANDROID_LOG_INFO, TAG, "register fail ===== signals[%d] ", i);
                 handle_exception(env);
                 // 失败后需要恢复原样
                 if (needMask) {
@@ -72,9 +66,7 @@ void init_with_signal(JNIEnv *env, jclass klass,
                 break;
             }
         }
-
-
     } while (0);
-    (*env)->ReleaseIntArrayElements(env, signals, signalsFromJava, 0);
 
+    (*env)->ReleaseIntArrayElements(env, signals, signalsFromJava, 0);
 }

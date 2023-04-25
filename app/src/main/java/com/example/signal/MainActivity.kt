@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private external fun throwNativeCrash()
+
     private fun createANR(textView: TextView){
         Handler(Looper.getMainLooper()).postDelayed({
             textView.text = "test anr"

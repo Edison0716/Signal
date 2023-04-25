@@ -24,14 +24,12 @@ static _Unwind_Reason_Code unwindCallback(struct _Unwind_Context *context, void 
     return _URC_NO_REASON;
 }
 
-
 size_t captureBacktrace(void **buffer, size_t max) {
     BacktraceState state = {buffer, buffer + max};
     _Unwind_Backtrace(unwindCallback, &state);
     // 获取大小
     return state.current - buffer;
 }
-
 
 void dumpBacktrace(std::ostream &os, void **buffer, size_t count) {
     for (size_t idx = 0; idx < count; ++idx) {
@@ -45,13 +43,10 @@ void dumpBacktrace(std::ostream &os, void **buffer, size_t count) {
     }
 }
 
-
 std::string backtraceToLogcat() {
     const size_t max = 30;
     void *buffer[max];
     std::ostringstream oss;
-
-
     dumpBacktrace(oss, buffer, captureBacktrace(buffer, max));
     return oss.str();
 }

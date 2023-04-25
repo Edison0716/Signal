@@ -29,31 +29,29 @@ object SignalController {
         throw SignalException()
     }
 
-
     @RequiresApi(Build.VERSION_CODES.M)
     @JvmStatic
     fun callNativeException(signal: Int, nativeStackTrace: String) {
         Log.i(TAG, "callNativeException $signal")
-        //Log.i(TAG, getStacktraceForMainThread())
-
+        // Log.i(TAG, getStacktraceForMainThread())
         // 处理anr的场景
-        if(signal == SignalConst.SIGQUIT && callOnCatchSignal?.checkIsAnr() == true){
+        if (signal == SignalConst.SIGQUIT && callOnCatchSignal?.checkIsAnr() == true) {
             application?.let {
-                callOnCatchSignal?.handleAnr(it,Utils.getLogcat(20,20,20))
+                callOnCatchSignal?.handleAnr(it, Utils.getLogcat(20, 20, 20))
             }
             return
         }
         application?.let {
-            callOnCatchSignal?.handleCrash(it,signal,Utils.getLogcat(20,20,20))
+            callOnCatchSignal?.handleCrash(it, signal, Utils.getLogcat(20, 20, 20))
         }
-
-
-
     }
 
-
     @JvmStatic
-    fun initSignal(signals: IntArray, application: Application,callOnCatchSignal: CallOnCatchSignal) {
+    fun initSignal(
+        signals: IntArray,
+        application: Application,
+        callOnCatchSignal: CallOnCatchSignal
+    ) {
         SignalController.application = application
         SignalController.callOnCatchSignal = callOnCatchSignal
         initWithSignals(signals)
@@ -61,7 +59,5 @@ object SignalController {
 
     @JvmStatic
     private external fun initWithSignals(signals: IntArray)
-
-
 
 }
