@@ -7,9 +7,12 @@
 #include <jni.h>
 #define SIGNAL_CRASH_STACK_SIZE (1024 * 128)
 #define TAG "hi_signal"
+#define TAG_EDISON "edison_signal"
+#define THREAD_NAME "signal_init"
+#define THREAD_SIGNAL_READ "signal_read"
 
 void init_with_signal(JNIEnv *env, jclass klass,
-                      jintArray signals,void (*handler)(int, struct siginfo *, void *));
+                      jintArray signals,void (*handler)(int));
 
 
 

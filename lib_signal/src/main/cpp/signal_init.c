@@ -17,7 +17,7 @@ JavaVM *javaVm = NULL;
 static int notifier = -1;
 static jclass callClass;
 
-static void sig_func(int sig_num, struct siginfo *info, void *ptr) {
+static void sig_handle_func(int sig_num) {
     uint64_t data;
     data = sig_num;
     __android_log_print(ANDROID_LOG_INFO, TAG, "catch signal %llu %d", data, notifier);
@@ -28,6 +28,7 @@ static void sig_func(int sig_num, struct siginfo *info, void *ptr) {
 }
 
 static void *invoke_crash(void *arg) {
+    pthread_setname_np(pthread_self(), THREAD_SIGNAL_READ);
     JNIEnv *env = NULL;
     if (JNI_OK != (*javaVm)->AttachCurrentThread(javaVm, &env, NULL)) {
         return NULL;
@@ -51,18 +52,16 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
     if (NULL == vm) return -1;
     if (JNI_OK != (*vm)->GetEnv(vm, (void **) &env, JNI_VERSION_1_6)) return -1;
     if (NULL == (cls = (*env)->FindClass(env, JNI_CLASS_NAME))) return -1;
-
     // 此时的cls仅仅是一个局部变量，如果错误引用会出现错误
     callClass = (*env)->NewGlobalRef(env, cls);
-
-
     return JNI_VERSION_1_6;
 }
 
 JNIEXPORT void JNICALL
 Java_com_pika_lib_1signal_SignalController_initWithSignals(JNIEnv *env, jclass clazz,
                                                            jintArray signals) {
-    init_with_signal(env, clazz, signals, sig_func);
+    pthread_setname_np(pthread_self(), THREAD_NAME);
+    init_with_signal(env, clazz, signals, sig_handle_func);
     notifier = eventfd(0, EFD_CLOEXEC);
     pthread_t thd;
     if (0 != pthread_create(&thd, NULL, invoke_crash, NULL)) {

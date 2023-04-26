@@ -10,5 +10,5 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_signal_MainActivity_throwNativeCrash(JNIEnv *env, jobject thiz) {
     // 向自身发送一个信号
-    raise(SIGABRT);
+    raise(SIGHUP);
 }

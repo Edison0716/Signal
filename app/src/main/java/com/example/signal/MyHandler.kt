@@ -18,6 +18,8 @@ class MyHandler : CallOnCatchSignal {
     @RequiresApi(Build.VERSION_CODES.M)
     override fun checkIsAnr(): Boolean {
         try {
+            val name = Thread.currentThread().name
+            Log.d("EdisonLi-Thread", name)
             val queue = Looper.getMainLooper().queue
             val field = queue.javaClass.getDeclaredField("mMessages")
             field.isAccessible = true
@@ -70,6 +72,7 @@ class MyHandler : CallOnCatchSignal {
         Log.e(TAG,logcat)
         Log.e(TAG,"logcat end   -----------------------")
 
+    //    Thread.sleep(2000)
 
         val restart: Intent? =
             context.packageManager.getLaunchIntentForPackage(context.packageName)

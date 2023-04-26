@@ -9,10 +9,10 @@
 #include <signal.h>
 #include "signal_action.h"
 #include "signal_exception.h"
-
+#include <pthread.h>
 
 void init_with_signal(JNIEnv *env, jclass klass,
-                      jintArray signals, void (*handler)(int, struct siginfo *, void *)) {
+                      jintArray signals, void (*handler)(int)) {
     // 注意释放内存
     jint *signalsFromJava = (*env)->GetIntArrayElements(env, signals, 0);
     int size = (*env)->GetArrayLength(env, signals);
@@ -44,10 +44,8 @@ void init_with_signal(JNIEnv *env, jclass klass,
                 break;
             }
         }
-
-
         struct sigaction sigc;
-        sigc.sa_sigaction = handler;
+        sigc.sa_handler = handler;
         // 信号处理时，先阻塞所有的其他信号，避免干扰正常的信号处理程序
         sigfillset(&sigc.sa_mask);
         sigc.sa_flags = SA_SIGINFO | SA_ONSTACK | SA_RESTART;
